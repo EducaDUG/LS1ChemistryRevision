@@ -1,17 +1,8 @@
 // api/ask.js — runs on Vercel server, NOT in the browser
 
 export default async function handler(req, res) {
-  // --- CORS: allow your sites to call this function ---
-  const allowedOrigins = [
-    "https://educadug.github.io",
-    "https://mrguevaracga.github.io",
-  ];
-
-  const origin = req.headers.origin || "";
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-  }
-
+  // --- SIMPLE CORS: allow any origin (good enough for this project) ---
+  res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
@@ -25,7 +16,6 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  // --- Read message from body ---
   try {
     const { message } = req.body || {};
 
@@ -38,7 +28,6 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "No API key configured on server" });
     }
 
-    // --- Call Gemini ---
     const url =
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" +
       apiKey;
@@ -58,7 +47,7 @@ export default async function handler(req, res) {
 
     const data = await geminiResponse.json();
 
-    // If Gemini itself returns an error, bubble it up clearly
+    // If Gemini itself returns an error, show it clearly
     if (!geminiResponse.ok || data.error) {
       const msg = data.error?.message || geminiResponse.statusText;
       return res
@@ -75,7 +64,6 @@ export default async function handler(req, res) {
         .json({ error: "Empty response from Gemini (no text field found)." });
     }
 
-    // Everything OK
     return res.status(200).json({ reply: text });
   } catch (err) {
     console.error(err);
