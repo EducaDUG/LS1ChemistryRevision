@@ -529,29 +529,30 @@
 // --- GEMINI API VIA VERCEL FUNCTION ---
 
 // 1) Tell the page where your Vercel backend lives
-const API_BASE = "https://ls-1-chemistry-revision.vercel.app";  // your Vercel URL
+const API_BASE = "https://ls-1-chemistry-revision.vercel.app"; // your Vercel URL
 
 // 2) Always call the Vercel API (works from any GitHub site)
 async function callGemini(prompt) {
-    try {
-        const response = await fetch(`${API_BASE}/api/ask`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message: prompt }),
-        });
+  try {
+    const response = await fetch(`${API_BASE}/api/ask`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: prompt }),
+    });
 
-        const data = await response.json();
+    const data = await response.json();
 
-        if (!response.ok) {
-            throw new Error(data.error || response.statusText);
-        }
-
-        return data.reply || "No response.";
-    } catch (e) {
-        console.error(e);
-        return `Error: ${e.message}`;
+    if (!response.ok) {
+      throw new Error(data.error || response.statusText);
     }
+
+    return data.reply || "No response.";
+  } catch (e) {
+    console.error(e);
+    return `Error: ${e.message}`;
+  }
 }
+
 
 
         // --- AUDIO TUTOR ---
