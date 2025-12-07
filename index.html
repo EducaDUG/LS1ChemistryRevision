@@ -5,13 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Science with Mr Guevara | Unit 1 Revision</title>
     
-    <!-- ================================================================= -->
-    <!-- 👇👇👇 YOUR API KEY 👇👇👇 -->
-    <script>
-        const MY_GOOGLE_API_KEY = "AIzaSyBWs__vP5HmaiAFxxQYUEENGAk0WqVWkgw"; 
-    </script>
-    <!-- ================================================================= -->
-
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
@@ -533,32 +526,21 @@
     <script>
         AOS.init({ duration: 800, once: true });
 
-        // --- GEMINI API ---
-        function getApiKey() {
-            if (typeof MY_GOOGLE_API_KEY !== 'undefined' && MY_GOOGLE_API_KEY.includes("AIza")) {
-                return MY_GOOGLE_API_KEY;
-            }
-            alert("⚠️ API KEY MISSING!");
-            return null;
-        }
-
+        // --- GEMINI API VIA VERCEL FUNCTION ---
         async function callGemini(prompt) {
-            const apiKey = getApiKey();
-            if (!apiKey) return "API Key missing.";
-
-            const url = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-            const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
-
             try {
-                const response = await fetch(url, {
+                const response = await fetch("/api/ask", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({ message: prompt })
                 });
                 const data = await response.json();
-                if (!response.ok) throw new Error(data.error?.message || response.statusText);
-                return data.candidates?.[0]?.content?.parts?.[0]?.text || "No response.";
+                if (!response.ok) {
+                    throw new Error(data.error || response.statusText);
+                }
+                return data.reply || "No response.";
             } catch (e) {
+                console.error(e);
                 return `Error: ${e.message}`;
             }
         }
