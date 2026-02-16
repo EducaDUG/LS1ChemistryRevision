@@ -1,794 +1,147 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Science with Mr Guevara | Unit 1 Revision</title>
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
-    <!-- AOS Animation Library -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <!-- Markdown Parser for Chat -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        cga: {
-                            crimson: '#A51C30', // Crimson Global Academy Red (Approx)
-                            navy: '#0C2340',    // Deep Navy
-                            gold: '#C5B358',    // Accent Gold
-                            light: '#F8F9FA',
-                        }
-                    },
-                    fontFamily: {
-                        heading: ['Montserrat', 'sans-serif'],
-                        body: ['Open Sans', 'sans-serif'],
-                    },
-                    animation: {
-                        'float': 'float 6s ease-in-out infinite',
-                        'spin-slow': 'spin 12s linear infinite',
-                        'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'speaking': 'speaking 1s infinite',
-                    },
-                    keyframes: {
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-20px)' },
-                        },
-                        speaking: {
-                            '0%, 100%': { transform: 'scale(1)' },
-                            '50%': { transform: 'scale(1.1)' },
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        /* Custom Styles */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        .flip-card {
-            background-color: transparent;
-            width: 100%;
-            height: 300px;
-            perspective: 1000px;
-            cursor: pointer;
-        }
-        .flip-card-inner {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            text-align: center;
-            transition: transform 0.6s;
-            transform-style: preserve-3d;
-            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-            border-radius: 1rem;
-        }
-        .flip-card.active .flip-card-inner {
-            transform: rotateY(180deg);
-        }
-        .flip-card-front, .flip-card-back {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            border-radius: 1rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 2rem;
-        }
-        .flip-card-front {
-            background-color: #fff;
-            color: #0C2340;
-            border: 2px solid #A51C30;
-        }
-        .flip-card-back {
-            background-color: #A51C30;
-            color: white;
-            transform: rotateY(180deg);
-        }
-        .particle {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            animation: float 10s infinite;
-        }
-        /* Audio Status Bar */
-        #audio-status {
-            transition: transform 0.3s ease-in-out;
-        }
-        #audio-status.active {
-            transform: translateY(0);
-        }
-        #audio-status.inactive {
-            transform: translateY(100%);
-        }
-    </style>
-</head>
-<body class="font-body bg-gray-50 text-gray-800 overflow-x-hidden">
-
-    <!-- Audio Status Overlay -->
-    <div id="audio-status" class="inactive fixed bottom-0 left-0 right-0 bg-cga-navy text-white p-4 z-[60] flex justify-center items-center gap-4 shadow-lg border-t-4 border-cga-gold">
-        <div class="w-3 h-3 bg-red-500 rounded-full animate-speaking"></div>
-        <span class="font-heading font-bold text-lg">Teacher speaking...</span>
-        <button onclick="stopSpeaking()" class="ml-4 px-3 py-1 bg-white/10 rounded-full text-xs hover:bg-white/20">Stop</button>
-    </div>
-
-    <!-- Navigation -->
-    <nav class="bg-cga-navy text-white sticky top-0 z-50 shadow-lg border-b-4 border-cga-crimson">
-        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="#" class="flex items-center gap-3 group">
-                <div class="w-10 h-10 bg-cga-crimson rounded-full flex items-center justify-center group-hover:rotate-180 transition-transform duration-500">
-                    <i class="fa-solid fa-flask text-white"></i>
-                </div>
-                <span class="font-heading font-bold text-xl tracking-wide">Science with Mr Guevara</span>
-            </a>
-            <div class="hidden md:flex gap-8 font-semibold text-sm uppercase tracking-wider">
-                <a href="#matter" class="hover:text-cga-gold transition-colors">Matter</a>
-                <a href="#changes" class="hover:text-cga-gold transition-colors">Changes</a>
-                <a href="#separation" class="hover:text-cga-gold transition-colors">Separation</a>
-                <a href="#quiz" class="px-4 py-2 bg-cga-crimson rounded-lg hover:bg-red-700 transition-colors">Quiz Time!</a>
-            </div>
-            <!-- Mobile Menu Button -->
-            <button class="md:hidden text-2xl"><i class="fa-solid fa-bars"></i></button>
-        </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <header class="relative bg-gradient-to-br from-cga-navy to-blue-900 text-white py-32 overflow-hidden">
-        <div class="particle w-20 h-20 top-10 left-10 delay-0"></div>
-        <div class="particle w-32 h-32 bottom-20 right-20 delay-1000"></div>
-        <div class="particle w-12 h-12 top-40 right-1/3 delay-500"></div>
-
-        <div class="container mx-auto px-6 relative z-10 text-center" data-aos="zoom-in">
-            <div class="inline-block px-4 py-1 border border-cga-gold text-cga-gold rounded-full text-sm font-bold mb-4 uppercase tracking-widest">Chemistry Revision</div>
-            <h1 class="font-heading text-5xl md:text-7xl font-extrabold mb-6 leading-tight">
-                Unit 1: Matter, Mixtures<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-cga-crimson to-cga-gold">and Separation</span>
-            </h1>
-            <p class="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-10 font-light">
-                Dive into the building blocks of the universe! Explore atoms, chemical reactions, and the secrets of separating mixtures.
-            </p>
-            <div class="flex flex-col md:flex-row gap-4 justify-center">
-                <a href="#matter" class="px-8 py-4 bg-cga-crimson text-white font-bold rounded-full hover:bg-red-700 transition-all hover:scale-105 shadow-lg shadow-red-900/50">
-                    Start Learning <i class="fa-solid fa-arrow-right ml-2"></i>
-                </a>
-                <button onclick="toggleChat()" class="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold rounded-full hover:from-purple-700 hover:to-indigo-700 transition-all hover:scale-105 shadow-lg flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-robot"></i> Ask Mr. Guevara Bot 🤖
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Part 1: Matter & Atoms -->
-    <section id="matter" class="py-24 bg-white relative">
-        <div class="container mx-auto px-6">
-            <div class="text-center mb-16" data-aos="fade-up">
-                <div class="flex justify-center items-center gap-4 mb-4">
-                    <h2 class="font-heading text-4xl font-bold text-cga-navy">The Building Blocks of Matter</h2>
-                    <!-- Listen & Learn Button -->
-                    <button onclick="generateAudio('Matter and Atoms')" class="px-4 py-2 bg-blue-100 text-cga-navy rounded-full text-sm font-bold hover:bg-blue-200 transition-colors flex items-center gap-2 border border-blue-200">
-                        <i class="fa-solid fa-headphones"></i> Listen & Learn
-                    </button>
-                </div>
-                <div class="w-24 h-1 bg-cga-crimson mx-auto"></div>
-            </div>
-
-            <!-- Atom Structure Interactive Diagram -->
-            <div class="grid md:grid-cols-2 gap-12 items-center mb-24">
-                <div class="bg-gray-100 rounded-3xl p-8 shadow-xl relative overflow-hidden group" data-aos="fade-right">
-                    <!-- Analogy Button -->
-                    <button onclick="explainWithAnalogy('Structure of an Atom')" class="absolute top-4 right-4 px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold hover:bg-yellow-200 transition-colors flex items-center gap-1 z-10">
-                        <i class="fa-solid fa-lightbulb"></i> Explain with Analogy
-                    </button>
-
-                    <!-- CSS Atom Animation -->
-                    <div class="relative w-64 h-64 mx-auto my-8">
-                        <div class="absolute inset-0 border-2 border-cga-navy/30 rounded-full animate-spin-slow w-full h-full" style="transform: rotateX(60deg);"></div>
-                        <div class="absolute inset-0 border-2 border-cga-navy/30 rounded-full animate-spin-slow w-full h-full" style="transform: rotateX(60deg) rotateY(60deg); animation-delay: -4s;"></div>
-                        <div class="absolute inset-0 border-2 border-cga-navy/30 rounded-full animate-spin-slow w-full h-full" style="transform: rotateX(60deg) rotateY(-60deg); animation-delay: -8s;"></div>
-                        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-cga-crimson rounded-full shadow-lg shadow-red-500/50 flex items-center justify-center text-white font-bold text-xs z-10 animate-pulse">N+P</div>
-                        <div class="absolute top-0 left-1/2 w-3 h-3 bg-cga-gold rounded-full shadow-lg animate-bounce"></div>
-                        <div class="absolute bottom-10 right-0 w-3 h-3 bg-cga-gold rounded-full shadow-lg animate-pulse"></div>
-                    </div>
-                    <div class="text-center">
-                        <h3 class="font-heading text-2xl font-bold text-cga-navy">The Atom</h3>
-                        <p class="text-gray-600">"Nature's Legos"</p>
-                    </div>
-                </div>
-
-                <div data-aos="fade-left">
-                    <h3 class="text-2xl font-bold mb-6 text-cga-navy flex items-center gap-3">
-                        <span class="bg-cga-navy text-white w-8 h-8 rounded-lg flex items-center justify-center text-sm">1</span>
-                        Structure of an Atom
-                    </h3>
-                    <div class="space-y-4">
-                        <div class="flex items-start gap-4 p-4 rounded-xl hover:bg-red-50 transition-colors border border-transparent hover:border-red-100">
-                            <div class="w-10 h-10 rounded-full bg-cga-crimson flex items-center justify-center text-white font-bold shrink-0">+</div>
-                            <div>
-                                <h4 class="font-bold text-lg text-cga-navy">Protons</h4>
-                                <p class="text-gray-600">Positive charge. Located deep in the nucleus. Gives the atom its mass.</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-4 p-4 rounded-xl hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-200">
-                            <div class="w-10 h-10 rounded-full bg-gray-400 flex items-center justify-center text-white font-bold shrink-0">0</div>
-                            <div>
-                                <h4 class="font-bold text-lg text-cga-navy">Neutrons</h4>
-                                <p class="text-gray-600">No charge (Neutral). The "glue" in the nucleus holding protons together.</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-4 p-4 rounded-xl hover:bg-yellow-50 transition-colors border border-transparent hover:border-yellow-100">
-                            <div class="w-10 h-10 rounded-full bg-cga-gold flex items-center justify-center text-white font-bold shrink-0">-</div>
-                            <div>
-                                <h4 class="font-bold text-lg text-cga-navy">Electrons</h4>
-                                <p class="text-gray-600">Negative charge. Tiny particles zooming in shells around the outside.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Elements vs Compounds Grid -->
-            <div class="grid md:grid-cols-3 gap-8 mb-24">
-                <div class="bg-cga-light p-8 rounded-2xl border-t-4 border-cga-crimson hover:-translate-y-2 transition-transform shadow-lg" data-aos="fade-up" data-aos-delay="0">
-                    <div class="text-4xl text-cga-crimson mb-4"><i class="fa-solid fa-cube"></i></div>
-                    <h3 class="text-xl font-bold mb-3 text-cga-navy">Element</h3>
-                    <p class="text-gray-600 mb-4">A pure substance made of <strong>one type</strong> of atom.</p>
-                    <div class="text-sm font-semibold text-cga-navy">Ex: Gold (Au)</div>
-                </div>
-                
-                <div class="bg-cga-light p-8 rounded-2xl border-t-4 border-cga-gold hover:-translate-y-2 transition-transform shadow-lg" data-aos="fade-up" data-aos-delay="100">
-                    <div class="text-4xl text-cga-gold mb-4"><i class="fa-solid fa-link"></i></div>
-                    <h3 class="text-xl font-bold mb-3 text-cga-navy">Molecule</h3>
-                    <p class="text-gray-600 mb-4">Two or more atoms bonded together (can be same or different).</p>
-                    <div class="text-sm font-semibold text-cga-navy">Ex: O₂ (Oxygen Gas)</div>
-                </div>
-
-                <div class="bg-cga-light p-8 rounded-2xl border-t-4 border-cga-navy hover:-translate-y-2 transition-transform shadow-lg" data-aos="fade-up" data-aos-delay="200">
-                    <div class="text-4xl text-cga-navy mb-4"><i class="fa-solid fa-flask-vial"></i></div>
-                    <h3 class="text-xl font-bold mb-3 text-cga-navy">Compound</h3>
-                    <p class="text-gray-600 mb-4">Two or more <strong>different</strong> elements bonded. New properties!</p>
-                    <div class="text-sm font-semibold text-cga-navy">Ex: NaCl (Salt)</div>
-                </div>
-            </div>
-
-            <!-- States of Matter Interactive Tabs -->
-            <div class="bg-cga-navy rounded-3xl p-8 md:p-12 text-white" data-aos="zoom-in">
-                <h3 class="text-3xl font-bold mb-8 text-center">States of Matter</h3>
-                <div class="flex flex-wrap justify-center gap-4 mb-8" id="stateTabs">
-                    <button onclick="changeState('solid')" class="px-6 py-2 rounded-full bg-cga-crimson font-bold hover:bg-white hover:text-cga-crimson transition-all active-tab" id="btn-solid">Solid</button>
-                    <button onclick="changeState('liquid')" class="px-6 py-2 rounded-full bg-white/10 font-bold hover:bg-white hover:text-cga-crimson transition-all" id="btn-liquid">Liquid</button>
-                    <button onclick="changeState('gas')" class="px-6 py-2 rounded-full bg-white/10 font-bold hover:bg-white hover:text-cga-crimson transition-all" id="btn-gas">Gas</button>
-                </div>
-                <div id="stateContent" class="grid md:grid-cols-2 gap-8 items-center bg-white/5 rounded-2xl p-8 backdrop-blur-sm transition-all duration-300">
-                    <!-- Content loaded by JS -->
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Part 2: Changes & Reactions -->
-    <section id="changes" class="py-24 bg-gray-100">
-        <div class="container mx-auto px-6">
-            <div class="text-center mb-16" data-aos="fade-up">
-                 <div class="flex justify-center items-center gap-4 mb-4">
-                    <h2 class="font-heading text-4xl font-bold text-cga-navy">Physical vs. Chemical Changes</h2>
-                     <!-- Listen & Learn Button -->
-                    <button onclick="generateAudio('Physical and Chemical Changes')" class="px-4 py-2 bg-blue-100 text-cga-navy rounded-full text-sm font-bold hover:bg-blue-200 transition-colors flex items-center gap-2 border border-blue-200">
-                        <i class="fa-solid fa-headphones"></i> Listen & Learn
-                    </button>
-                </div>
-                <div class="w-24 h-1 bg-cga-crimson mx-auto"></div>
-            </div>
-
-            <div class="grid md:grid-cols-2 gap-10">
-                <!-- Physical Change Card -->
-                <div class="flip-card group" onclick="this.classList.toggle('active')" data-aos="flip-left">
-                    <div class="flip-card-inner">
-                        <div class="flip-card-front shadow-xl relative">
-                             <!-- Analogy Button -->
-                            <button onclick="event.stopPropagation(); explainWithAnalogy('Physical Change')" class="absolute top-4 right-4 px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold hover:bg-yellow-200 transition-colors flex items-center gap-1 z-10">
-                                <i class="fa-solid fa-lightbulb"></i> Analogy
-                            </button>
-                            <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mb-6">
-                                <i class="fa-solid fa-icicles text-4xl text-blue-600"></i>
-                            </div>
-                            <h3 class="text-2xl font-bold text-cga-navy">Physical Change</h3>
-                            <p class="mt-4 text-sm text-gray-500 font-semibold uppercase tracking-widest">Click to Flip</p>
-                        </div>
-                        <div class="flip-card-back shadow-xl border-4 border-cga-navy bg-white text-cga-navy">
-                            <h3 class="text-xl font-bold mb-4 text-cga-crimson">No New Substance!</h3>
-                            <p class="text-sm px-4 mb-4">Change in appearance/state only. Molecules stay the same.</p>
-                            <ul class="text-left text-sm space-y-2 px-8 list-disc">
-                                <li>Melting Ice</li>
-                                <li>Tearing Paper</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Chemical Change Card -->
-                <div class="flip-card group" onclick="this.classList.toggle('active')" data-aos="flip-right">
-                    <div class="flip-card-inner">
-                        <div class="flip-card-front shadow-xl border-cga-gold relative">
-                             <!-- Analogy Button -->
-                            <button onclick="event.stopPropagation(); explainWithAnalogy('Chemical Change')" class="absolute top-4 right-4 px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold hover:bg-yellow-200 transition-colors flex items-center gap-1 z-10">
-                                <i class="fa-solid fa-lightbulb"></i> Analogy
-                            </button>
-                            <div class="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mb-6">
-                                <i class="fa-solid fa-fire text-4xl text-orange-600"></i>
-                            </div>
-                            <h3 class="text-2xl font-bold text-cga-navy">Chemical Change</h3>
-                            <p class="mt-4 text-sm text-gray-500 font-semibold uppercase tracking-widest">Click to Flip</p>
-                        </div>
-                        <div class="flip-card-back shadow-xl bg-cga-navy text-white border-4 border-cga-gold">
-                            <h3 class="text-xl font-bold mb-4 text-cga-gold">New Substance Created!</h3>
-                            <p class="text-sm px-4 mb-4">Bonds break, atoms rearrange. Hard to undo.</p>
-                            <ul class="text-left text-sm space-y-2 px-8 list-disc text-gray-300">
-                                <li>Burning Wood</li>
-                                <li>Rusting Iron</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Conservation of Mass -->
-            <div class="mt-20 bg-white p-8 rounded-2xl shadow-lg border-l-8 border-cga-gold" data-aos="fade-up">
-                <div class="flex flex-col md:flex-row gap-8 items-center">
-                    <div class="md:w-1/3 text-center">
-                        <i class="fa-solid fa-scale-balanced text-6xl text-cga-navy mb-4"></i>
-                        <h3 class="text-2xl font-bold text-cga-navy">Law of Conservation</h3>
-                    </div>
-                    <div class="md:w-2/3 border-l md:border-gray-200 md:pl-8">
-                        <p class="text-xl font-bold text-cga-crimson mb-2">"Matter cannot be created or destroyed."</p>
-                        <p class="text-gray-600 mb-4">If you burn a <strong>5kg log</strong>, the ash + smoke + gas = <strong>5kg</strong>.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Part 3: Mixtures & Separation -->
-    <section id="separation" class="py-24 bg-white">
-        <div class="container mx-auto px-6">
-            <div class="text-center mb-16" data-aos="fade-up">
-                 <div class="flex justify-center items-center gap-4 mb-4">
-                    <h2 class="font-heading text-4xl font-bold text-cga-navy">Separation Techniques</h2>
-                     <!-- Listen & Learn Button -->
-                    <button onclick="generateAudio('Separating Mixtures')" class="px-4 py-2 bg-blue-100 text-cga-navy rounded-full text-sm font-bold hover:bg-blue-200 transition-colors flex items-center gap-2 border border-blue-200">
-                        <i class="fa-solid fa-headphones"></i> Listen & Learn
-                    </button>
-                </div>
-                <div class="w-24 h-1 bg-cga-crimson mx-auto"></div>
-            </div>
-
-            <!-- Mixtures Definition -->
-            <div class="grid md:grid-cols-2 gap-8 mb-16">
-                <div class="bg-red-50 p-6 rounded-xl border border-red-100 relative" data-aos="fade-right">
-                     <!-- Analogy Button -->
-                    <button onclick="explainWithAnalogy('Heterogeneous Mixture')" class="absolute top-4 right-4 px-3 py-1 bg-white text-yellow-800 rounded-full text-xs font-bold hover:bg-yellow-100 transition-colors flex items-center gap-1 z-10 border border-yellow-200">
-                        <i class="fa-solid fa-lightbulb"></i> Analogy
-                    </button>
-                    <h3 class="font-bold text-xl text-cga-crimson mb-2">Heterogeneous Mixture</h3>
-                    <p class="text-gray-600">"Hetero" = Different. You can see the parts (e.g., Pizza, Trail Mix).</p>
-                </div>
-                <div class="bg-blue-50 p-6 rounded-xl border border-blue-100 relative" data-aos="fade-left">
-                    <h3 class="font-bold text-xl text-cga-navy mb-2">Homogeneous Mixture</h3>
-                    <p class="text-gray-600">"Homo" = Same. Looks uniform throughout (e.g., Salt Water, Air).</p>
-                </div>
-            </div>
-
-            <!-- Separation Accordion -->
-            <div class="space-y-4 max-w-4xl mx-auto">
-                <div class="border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow" data-aos="fade-up">
-                    <button class="w-full px-6 py-4 text-left bg-gray-50 hover:bg-gray-100 flex justify-between items-center" onclick="toggleAccordion('sieving')">
-                        <span class="font-bold text-lg text-cga-navy"><i class="fa-solid fa-filter mr-3 text-cga-crimson"></i>Sieving</span>
-                        <i class="fa-solid fa-chevron-down transform transition-transform" id="icon-sieving"></i>
-                    </button>
-                    <div id="content-sieving" class="hidden px-6 py-4 bg-white border-t">
-                        <p class="text-gray-700 mb-2"><strong>What it separates:</strong> Large solids from small solids.</p>
-                        <p class="text-gray-600">Uses a mesh screen. Smaller particles fall through.</p>
-                    </div>
-                </div>
-                <!-- Filtration -->
-                <div class="border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="50">
-                    <button class="w-full px-6 py-4 text-left bg-gray-50 hover:bg-gray-100 flex justify-between items-center" onclick="toggleAccordion('filtration')">
-                        <span class="font-bold text-lg text-cga-navy"><i class="fa-solid fa-glass-water-droplet mr-3 text-cga-crimson"></i>Filtration</span>
-                        <i class="fa-solid fa-chevron-down transform transition-transform" id="icon-filtration"></i>
-                    </button>
-                    <div id="content-filtration" class="hidden px-6 py-4 bg-white border-t">
-                        <p class="text-gray-700 mb-2"><strong>What it separates:</strong> Insoluble solids from liquids.</p>
-                        <p class="text-gray-600">Uses filter paper. Liquid passes, solid gets stuck.</p>
-                    </div>
-                </div>
-                <!-- Evaporation -->
-                <div class="border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="100">
-                    <button class="w-full px-6 py-4 text-left bg-gray-50 hover:bg-gray-100 flex justify-between items-center" onclick="toggleAccordion('evaporation')">
-                        <span class="font-bold text-lg text-cga-navy"><i class="fa-solid fa-sun mr-3 text-cga-crimson"></i>Evaporation</span>
-                        <i class="fa-solid fa-chevron-down transform transition-transform" id="icon-evaporation"></i>
-                    </button>
-                    <div id="content-evaporation" class="hidden px-6 py-4 bg-white border-t">
-                        <p class="text-gray-700 mb-2"><strong>What it separates:</strong> Dissolved solids from liquids.</p>
-                        <p class="text-gray-600">Heats liquid until it turns to gas, leaving solid crystals.</p>
-                    </div>
-                </div>
-                 <!-- Magnetism -->
-                <div class="border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="150">
-                    <button class="w-full px-6 py-4 text-left bg-gray-50 hover:bg-gray-100 flex justify-between items-center" onclick="toggleAccordion('magnetism')">
-                        <span class="font-bold text-lg text-cga-navy"><i class="fa-solid fa-magnet mr-3 text-cga-crimson"></i>Magnetism</span>
-                        <i class="fa-solid fa-chevron-down transform transition-transform" id="icon-magnetism"></i>
-                    </button>
-                    <div id="content-magnetism" class="hidden px-6 py-4 bg-white border-t">
-                        <p class="text-gray-700 mb-2"><strong>What it separates:</strong> Magnetic solids from non-magnetic solids.</p>
-                        <p class="text-gray-600">Uses a magnet to pull out iron, nickel, or cobalt.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Quiz Section -->
-    <section id="quiz" class="py-24 bg-cga-navy text-white relative overflow-hidden">
-        <div class="absolute inset-0 opacity-10">
-            <i class="fa-solid fa-flask absolute top-10 left-10 text-9xl transform -rotate-12"></i>
-            <i class="fa-solid fa-atom absolute bottom-20 right-20 text-9xl transform rotate-45"></i>
-        </div>
-
-        <div class="container mx-auto px-6 max-w-3xl relative z-10">
-            <div class="text-center mb-12">
-                <i class="fa-solid fa-brain text-6xl text-cga-gold mb-6 animate-pulse"></i>
-                <h2 class="font-heading text-4xl font-bold">Mr Guevara's Lab Challenge</h2>
-                <p class="mt-4 text-gray-300">Test your knowledge!</p>
-                <button onclick="generateAIQuestion()" id="gen-btn" class="mt-6 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full font-bold hover:shadow-lg hover:scale-105 transition-all text-white border-2 border-white/20">
-                    <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Generate Fresh Question ✨
-                </button>
-            </div>
-
-            <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 shadow-2xl relative">
-                <div id="quiz-loading" class="hidden absolute inset-0 bg-cga-navy/80 rounded-2xl flex flex-col items-center justify-center z-20">
-                    <div class="w-12 h-12 border-4 border-cga-gold border-t-transparent rounded-full animate-spin mb-4"></div>
-                    <p class="text-cga-gold font-bold">Consulting Bot...</p>
-                </div>
-
-                <div id="quiz-container">
-                    <div id="dynamic-quiz-area"></div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-gray-400 py-12 border-t-4 border-cga-gold">
-        <div class="container mx-auto px-6 text-center">
-            <p class="font-heading font-bold text-white text-lg mb-2">Science with Mr Guevara</p>
-            <p class="text-sm">Crimson Global Academy Revision Material</p>
-        </div>
-    </footer>
-    
-    <!-- Chat Interface -->
-    <div class="fixed bottom-8 right-8 z-50">
-        <button onclick="toggleChat()" class="w-16 h-16 bg-cga-crimson rounded-full shadow-2xl flex items-center justify-center text-white text-3xl hover:scale-110 transition-transform duration-300 border-4 border-white">
-            <i class="fa-solid fa-robot"></i>
-        </button>
-    </div>
-
-    <div id="ai-chat-window" class="fixed bottom-28 right-8 w-96 bg-white rounded-2xl shadow-2xl z-50 border border-gray-200 overflow-hidden hidden flex flex-col h-[500px]">
-        <div class="bg-cga-navy p-4 flex justify-between items-center text-white">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-cga-navy font-bold text-xl">
-                    <i class="fa-solid fa-robot"></i>
-                </div>
-                <div>
-                    <h3 class="font-heading font-bold">Mr. Guevara Bot</h3>
-                    <p class="text-xs text-cga-gold">The bot version (not as cool as the real one) 🤖</p>
-                </div>
-            </div>
-            <button onclick="toggleChat()" class="text-white hover:text-cga-crimson transition-colors"><i class="fa-solid fa-times text-xl"></i></button>
-        </div>
-        
-        <div id="chat-messages" class="flex-1 p-4 overflow-y-auto bg-gray-50 space-y-4">
-            <div class="flex gap-3">
-                <div class="w-8 h-8 bg-cga-navy rounded-full flex items-center justify-center text-white shrink-0 text-xs"><i class="fa-solid fa-robot"></i></div>
-                <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-sm text-gray-700 border border-gray-100">
-                    Hello! I'm Mr. Guevara Bot. I may not be as cool as the real Mr. Guevara, but I'm here to help until our next lesson! Ask me anything about Unit 1. 🧪
-                </div>
-            </div>
-        </div>
-
-        <div class="p-4 bg-white border-t border-gray-100">
-            <div class="flex gap-2">
-                <input type="text" id="chat-input" placeholder="Ask a question..." class="flex-1 px-4 py-2 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-cga-crimson" onkeypress="if(event.key === 'Enter') sendMessage()">
-                <button onclick="sendMessage()" class="w-10 h-10 bg-cga-crimson text-white rounded-full flex items-center justify-center hover:bg-red-700 transition-colors shadow-md">
-                    <i class="fa-solid fa-paper-plane text-sm"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- Scripts -->
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script>
-        AOS.init({ duration: 800, once: true });
-
-// --- GEMINI API VIA VERCEL FUNCTION ---
-
-// 1) Tell the page where your Vercel backend lives
-const API_BASE = "https://ls-1-chemistry-revision.vercel.app"; // your Vercel URL
-
-// 2) Always call the Vercel API (works from any GitHub site)
-async function callGemini(prompt) {
-  try {
-    const response = await fetch(`${API_BASE}/api/ask`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: prompt }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || response.statusText);
-    }
-
-    return data.reply || "No response.";
-  } catch (e) {
-    console.error(e);
-    return `Error: ${e.message}`;
-  }
-}
-
-
-
-        // --- AUDIO TUTOR ---
-        async function generateAudio(topic) {
-            const status = document.getElementById('audio-status');
-            status.classList.remove('inactive');
-            status.classList.add('active');
-            status.querySelector('span').innerText = "Generating Script...";
-
-            const prompt = `You are a fun science teacher explaining ${topic} to 14-year-olds. Keep it under 80 words. Be energetic. End with a "Secret Tip". Plain text only.`;
-            const text = await callGemini(prompt);
-            speakText(text);
-        }
-
-        function speakText(text) {
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            const voices = window.speechSynthesis.getVoices();
-            // Try to find a male voice
-            const maleVoice = voices.find(v => v.name.toLowerCase().includes('male') || v.name.includes('David') || v.name.includes('Google US English'));
-            if(maleVoice) utterance.voice = maleVoice;
-
-            const status = document.getElementById('audio-status');
-            status.querySelector('span').innerText = "Teacher speaking...";
-
-            utterance.onend = () => {
-                status.classList.remove('active');
-                status.classList.add('inactive');
-            };
-            window.speechSynthesis.speak(utterance);
-        }
-
-        function stopSpeaking() {
-            window.speechSynthesis.cancel();
-            document.getElementById('audio-status').classList.remove('active');
-            document.getElementById('audio-status').classList.add('inactive');
-        }
-
-        // --- ANALOGY GENERATOR ---
-        async function explainWithAnalogy(topic) {
-            const chatWindow = document.getElementById('ai-chat-window');
-            const msgs = document.getElementById('chat-messages');
-            
-            if(chatWindow.classList.contains('hidden')) toggleChat();
-
-            // Add loading
-            msgs.innerHTML += `<div class="flex gap-3 chat-message"><div class="w-8 h-8 bg-cga-navy rounded-full flex items-center justify-center text-white text-xs"><i class="fa-solid fa-robot"></i></div><div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-sm border border-gray-100">Thinking of a cool analogy for ${topic}... 🤔</div></div>`;
-            msgs.scrollTop = msgs.scrollHeight;
-
-            const prompt = `Explain ${topic} using a simple, fun analogy for a 14-year-old. Example: "A cell is like a city...". Keep it very short (2 sentences max).`;
-            const text = await callGemini(prompt);
-
-            // Replace loading (simplified: just add new message)
-            msgs.innerHTML += `<div class="flex gap-3 chat-message"><div class="w-8 h-8 bg-cga-navy rounded-full flex items-center justify-center text-white text-xs"><i class="fa-solid fa-lightbulb"></i></div><div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-sm border border-yellow-200 bg-yellow-50"><strong>Analogy Time:</strong> ${marked.parse(text)}</div></div>`;
-            msgs.scrollTop = msgs.scrollHeight;
-        }
-
-        // --- CHATBOT ---
-        function toggleChat() {
-            const chatWindow = document.getElementById('ai-chat-window');
-            if (chatWindow.classList.contains('hidden')) {
-                chatWindow.classList.remove('hidden');
-                setTimeout(() => { 
-                    chatWindow.style.opacity = '1';
-                    chatWindow.style.transform = 'translateY(0) scale(1)';
-                }, 10);
-                document.getElementById('chat-input').focus();
-            } else {
-                chatWindow.style.opacity = '0';
-                chatWindow.style.transform = 'translateY(20px) scale(0.95)';
-                setTimeout(() => chatWindow.classList.add('hidden'), 300);
-            }
-        }
-
-        async function sendMessage() {
-            const input = document.getElementById('chat-input');
-            const message = input.value.trim();
-            const container = document.getElementById('chat-messages');
-
-            if (!message) return;
-
-            container.innerHTML += `<div class="flex gap-3 justify-end chat-message"><div class="bg-cga-navy text-white p-3 rounded-2xl rounded-tr-none shadow-md text-sm">${message}</div></div>`;
-            input.value = '';
-            container.scrollTop = container.scrollHeight;
-
-            // System Prompt
-            const systemContext = "You are Mr. Guevara Bot, a fun, AI version of the teacher. You are not as cool as the real Mr. Guevara, but you are here to help until the next lesson. Keep answers simple (age 14). Use emojis. Remind students occasionally that you are a bot. The topic is Unit 1 Chemistry.";
-            const fullPrompt = `${systemContext}\n\nStudent: ${message}\nBot:`;
-
-            const responseText = await callGemini(fullPrompt);
-
-            container.innerHTML += `<div class="flex gap-3 chat-message"><div class="w-8 h-8 bg-cga-navy rounded-full flex items-center justify-center text-white shrink-0 text-xs"><i class="fa-solid fa-robot"></i></div><div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-sm text-gray-700 border border-gray-100 prose prose-sm">${marked.parse(responseText)}</div></div>`;
-            container.scrollTop = container.scrollHeight;
-        }
-
-        // --- QUIZ ---
-        const quizQuestions = [
-            { question: "Which of the following is NOT matter?", options: ["Air", "Light", "Water", "Rock"], correct: 1 },
-            { question: "What type of change is melting ice?", options: ["Physical Change", "Chemical Change", "Nuclear Change", "Biological Change"], correct: 0 },
-            { question: "Which method separates sand and water?", options: ["Magnetism", "Evaporation", "Filtration", "Freezing"], correct: 2 },
-            { question: "What is the smallest unit of matter?", options: ["Molecule", "Atom", "Compound", "Cell"], correct: 1 },
-            { question: "Which particle has a positive charge?", options: ["Electron", "Neutron", "Proton", "Photon"], correct: 2 },
-            { question: "Where are electrons located?", options: ["In the nucleus", "Inside protons", "Orbiting the nucleus", "Inside neutrons"], correct: 2 },
-            { question: "What charge does a neutron have?", options: ["Positive", "Negative", "Neutral (No charge)", "Variable"], correct: 2 },
-            { question: "H₂O (Water) is an example of what?", options: ["Element", "Atom", "Compound", "Mixture"], correct: 2 },
-            { question: "O₂ (Oxygen gas) is an example of what?", options: ["Compound", "Molecule", "Mixture", "Solution"], correct: 1 },
-            { question: "Which of these is a pure element?", options: ["Water", "Gold", "Salt", "Air"], correct: 1 },
-            { question: "In which state are particles packed tightly together?", options: ["Gas", "Liquid", "Solid", "Plasma"], correct: 2 },
-            { question: "Which state of matter fills the entire container?", options: ["Solid", "Liquid", "Gas", "Ice"], correct: 2 },
-            { question: "What happens to particles in a liquid?", options: ["They vibrate in place", "They slide past each other", "They fly apart quickly", "They stop moving"], correct: 1 },
-            { question: "What is the change from liquid to gas called?", options: ["Melting", "Freezing", "Evaporation", "Condensation"], correct: 2 },
-            { question: "What is the change from gas to liquid called?", options: ["Sublimation", "Evaporation", "Condensation", "Melting"], correct: 2 },
-            { question: "Burning wood is an example of what?", options: ["Physical Change", "Chemical Change", "Phase Change", "No Change"], correct: 1 },
-            { question: "Rusting iron is an example of what?", options: ["Chemical Change", "Physical Change", "Evaporation", "Filtration"], correct: 0 },
-            { question: "Tearing a piece of paper is what kind of change?", options: ["Chemical", "Physical", "Biological", "Atomic"], correct: 1 },
-            { question: "What is a sign of a chemical reaction?", options: ["Change in shape", "Melting", "Bubbles/Gas production", "Getting wet"], correct: 2 },
-            { question: "The Law of Conservation of Matter states that matter cannot be...", options: ["Seen", "Created or Destroyed", "Changed", "Moved"], correct: 1 },
-            { question: "If you burn a 5kg log, what is the mass of the ash + smoke?", options: ["Less than 5kg", "More than 5kg", "Exactly 5kg", "0kg"], correct: 2 },
-            { question: "Which of these is a heterogeneous mixture?", options: ["Salt water", "Air", "Pizza", "Pure gold"], correct: 2 },
-            { question: "Which of these is a homogeneous mixture (solution)?", options: ["Trail mix", "Sand and water", "Salt water", "Pizza"], correct: 2 },
-            { question: "Which method is best for separating salt from seawater?", options: ["Filtration", "Sieving", "Evaporation", "Magnetism"], correct: 2 },
-            { question: "How would you separate iron filings from sand?", options: ["Add water", "Use a magnet", "Heat it up", "Freeze it"], correct: 1 },
-            { question: "What tool is used for filtration?", options: ["Magnet", "Sieve", "Filter paper", "Bunsen burner"], correct: 2 },
-            { question: "Sieving is used to separate mixtures based on what property?", options: ["Color", "Size", "Magnetism", "Taste"], correct: 1 },
-            { question: "When salt dissolves in water, what is the mixture called?", options: ["Suspension", "Solution", "Compound", "Element"], correct: 1 },
-            { question: "Can you reverse a chemical change easily?", options: ["Yes, always", "No, usually not", "Only with a magnet", "Only by freezing"], correct: 1 },
-            { question: "What is the center of an atom called?", options: ["Shell", "Orbit", "Nucleus", "Proton"], correct: 2 }
-        ];
-
-        function renderQuiz() {
-            const container = document.getElementById('quiz-container');
-            let html = '<div id="dynamic-quiz-area"></div>';
-            
-            quizQuestions.forEach((q, index) => {
-                const hiddenClass = index === 0 ? '' : 'hidden';
-                html += `
-                    <div class="quiz-question mb-6 ${hiddenClass}" id="q-${index}">
-                        <p class="text-lg font-bold mb-4"><span class="text-cga-gold">Q${index + 1}:</span> ${q.question}</p>
-                        <div class="space-y-3">
-                            ${q.options.map((opt, i) => `
-                                <button onclick="checkAnswer(this, ${i === q.correct}, ${index})" class="quiz-btn w-full text-left p-4 rounded-lg bg-white/5 hover:bg-white/20 transition-all border border-transparent">
-                                    ${String.fromCharCode(65+i)}) ${opt}
-                                </button>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            });
-            html += `<div id="quiz-result" class="hidden text-center pt-8 border-t border-white/10 mt-8"><h3 class="text-3xl font-bold text-cga-gold mb-4">Great Job! 🎉</h3><button onclick="location.reload()" class="mt-6 px-6 py-2 bg-cga-crimson rounded-full font-bold hover:bg-red-600 transition-colors">Restart Quiz</button></div>`;
-            container.innerHTML = html;
-        }
-
-        function checkAnswer(btn, isCorrect, qIndex) {
-            const currentQ = document.getElementById(`q-${qIndex}`);
-            const buttons = currentQ.getElementsByTagName('button');
-            const correctIndex = quizQuestions[qIndex].correct; 
-
-            for(let b of buttons) { b.disabled = true; }
-
-            if(isCorrect) {
-                btn.classList.add('bg-green-500', 'border-green-400');
-                btn.innerHTML += ' <i class="fa-solid fa-check ml-2"></i>';
-            } else {
-                btn.classList.add('bg-red-500', 'border-red-400');
-                btn.innerHTML += ' <i class="fa-solid fa-xmark ml-2"></i>';
-                const correctBtn = buttons[correctIndex];
-                if(correctBtn) {
-                    correctBtn.classList.add('bg-green-600', 'border-green-500', 'opacity-75');
-                    correctBtn.innerHTML += ' <i class="fa-solid fa-check ml-2"></i> (Correct Answer)';
-                }
-            }
-
-            setTimeout(() => {
-                currentQ.classList.add('hidden');
-                const nextQ = document.getElementById(`q-${qIndex + 1}`);
-                if(nextQ) {
-                    nextQ.classList.remove('hidden');
-                } else {
-                    document.getElementById('quiz-result').classList.remove('hidden');
-                }
-            }, 2000);
-        }
-
-        async function generateAIQuestion() {
-            const loading = document.getElementById('quiz-loading');
-            const area = document.getElementById('dynamic-quiz-area');
-            const btn = document.getElementById('gen-btn');
-            loading.classList.remove('hidden');
-            btn.disabled = true;
-
-            const prompt = `Generate 1 multiple choice question about Matter/Atoms/Changes for a middle school science student. Return ONLY raw JSON: {"question": "text", "options": ["A", "B", "C"], "correctIndex": 0}.`;
-
-            try {
-                let jsonStr = await callGemini(prompt);
-                jsonStr = jsonStr.replace(/```json/g, '').replace(/```/g, '').trim();
-                const qData = JSON.parse(jsonStr);
-
-                const qHtml = `
-                    <div class="quiz-question mb-6 animate-pulse-fast" style="animation: fadeIn 0.5s ease forwards">
-                        <div class="flex justify-between items-center mb-4"><p class="text-lg font-bold"><span class="text-cga-gold"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Question:</span> ${qData.question}</p></div>
-                        <div class="space-y-3">
-                            ${qData.options.map((opt, idx) => `
-                                <button onclick="checkAIAnswer(this, ${idx === qData.correctIndex})" class="quiz-btn w-full text-left p-4 rounded-lg bg-white/10 hover:bg-white/20 transition-all border-2 border-white/10 backdrop-blur-sm shadow-lg font-semibold text-white">${String.fromCharCode(65+idx)}) ${opt}</button>
-                            `).join('')}
-                        </div>
-                    </div>`;
-                const div = document.createElement('div');
-                div.innerHTML = qHtml;
-                area.prepend(div);
-            } catch (e) { console.error("Quiz Gen Error:", e); } 
-            finally { loading.classList.add('hidden'); btn.disabled = false; }
-        }
-
-        function checkAIAnswer(btn, isCorrect) {
-            if(isCorrect) { btn.classList.add('bg-green-500', 'border-green-400'); btn.innerHTML += ' <i class="fa-solid fa-check ml-2"></i>'; } 
-            else { btn.classList.add('bg-red-500', 'border-red-400'); btn.innerHTML += ' <i class="fa-solid fa-xmark ml-2"></i>'; }
-        }
-
-        // Init
-        renderQuiz();
-        // Existing Logic
-        function changeState(state) {
-            ['solid', 'liquid', 'gas'].forEach(s => {
-                const btn = document.getElementById(`btn-${s}`);
-                btn.className = s === state ? "px-6 py-2 rounded-full bg-cga-crimson font-bold hover:bg-white hover:text-cga-crimson transition-all active-tab shadow-lg transform scale-105" : "px-6 py-2 rounded-full bg-white/10 font-bold hover:bg-white hover:text-cga-crimson transition-all";
-            });
-            const content = document.getElementById('stateContent');
-            content.innerHTML = state === 'solid' ? `<div class="text-center md:text-left"><h4 class="text-2xl font-bold text-cga-gold mb-2">Solids</h4><p class="text-lg leading-relaxed mb-4">Packed tight. Vibrate only.</p></div>` : 
-                               state === 'liquid' ? `<div class="text-center md:text-left"><h4 class="text-2xl font-bold text-cga-gold mb-2">Liquids</h4><p class="text-lg leading-relaxed mb-4">Close together. Slide past.</p></div>` :
-                               `<div class="text-center md:text-left"><h4 class="text-2xl font-bold text-cga-gold mb-2">Gases</h4><p class="text-lg leading-relaxed mb-4">Far apart. Zoom fast.</p></div>`;
-        }
-        function toggleAccordion(id) {
-            document.getElementById(`content-${id}`).classList.toggle('hidden');
-        }
-        // Initialize with Solid state
-        changeState('solid');
-    </script>
-</body>
-</html>
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/index.html b/index.html
+index da9b2e6ebb002087f57a9e34d3ab34d62f17268f..1373407b0bffd57a95202f09bbc58bf98bbc7b00 100644
+--- a/index.html
++++ b/index.html
+@@ -32,50 +32,53 @@
+                         heading: ['Montserrat', 'sans-serif'],
+                         body: ['Open Sans', 'sans-serif'],
+                     },
+                     animation: {
+                         'float': 'float 6s ease-in-out infinite',
+                         'spin-slow': 'spin 12s linear infinite',
+                         'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                         'speaking': 'speaking 1s infinite',
+                     },
+                     keyframes: {
+                         float: {
+                             '0%, 100%': { transform: 'translateY(0)' },
+                             '50%': { transform: 'translateY(-20px)' },
+                         },
+                         speaking: {
+                             '0%, 100%': { transform: 'scale(1)' },
+                             '50%': { transform: 'scale(1.1)' },
+                         }
+                     }
+                 }
+             }
+         }
+     </script>
+     <style>
+         /* Custom Styles */
++        body {
++            background-color: crimson;
++        }
+         .glass-panel {
+             background: rgba(255, 255, 255, 0.95);
+             backdrop-filter: blur(10px);
+             border: 1px solid rgba(255, 255, 255, 0.2);
+         }
+         .flip-card {
+             background-color: transparent;
+             width: 100%;
+             height: 300px;
+             perspective: 1000px;
+             cursor: pointer;
+         }
+         .flip-card-inner {
+             position: relative;
+             width: 100%;
+             height: 100%;
+             text-align: center;
+             transition: transform 0.6s;
+             transform-style: preserve-3d;
+             box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+             border-radius: 1rem;
+         }
+         .flip-card.active .flip-card-inner {
+             transform: rotateY(180deg);
+         }
+@@ -98,81 +101,81 @@
+             border: 2px solid #A51C30;
+         }
+         .flip-card-back {
+             background-color: #A51C30;
+             color: white;
+             transform: rotateY(180deg);
+         }
+         .particle {
+             position: absolute;
+             border-radius: 50%;
+             background: rgba(255, 255, 255, 0.1);
+             animation: float 10s infinite;
+         }
+         /* Audio Status Bar */
+         #audio-status {
+             transition: transform 0.3s ease-in-out;
+         }
+         #audio-status.active {
+             transform: translateY(0);
+         }
+         #audio-status.inactive {
+             transform: translateY(100%);
+         }
+     </style>
+ </head>
+-<body class="font-body bg-gray-50 text-gray-800 overflow-x-hidden">
++<body class="font-body bg-cga-crimson text-gray-800 overflow-x-hidden">
+ 
+     <!-- Audio Status Overlay -->
+     <div id="audio-status" class="inactive fixed bottom-0 left-0 right-0 bg-cga-navy text-white p-4 z-[60] flex justify-center items-center gap-4 shadow-lg border-t-4 border-cga-gold">
+         <div class="w-3 h-3 bg-red-500 rounded-full animate-speaking"></div>
+         <span class="font-heading font-bold text-lg">Teacher speaking...</span>
+         <button onclick="stopSpeaking()" class="ml-4 px-3 py-1 bg-white/10 rounded-full text-xs hover:bg-white/20">Stop</button>
+     </div>
+ 
+     <!-- Navigation -->
+-    <nav class="bg-cga-navy text-white sticky top-0 z-50 shadow-lg border-b-4 border-cga-crimson">
++    <nav class="bg-cga-crimson text-white sticky top-0 z-50 shadow-lg border-b-4 border-cga-gold">
+         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+             <a href="#" class="flex items-center gap-3 group">
+                 <div class="w-10 h-10 bg-cga-crimson rounded-full flex items-center justify-center group-hover:rotate-180 transition-transform duration-500">
+                     <i class="fa-solid fa-flask text-white"></i>
+                 </div>
+                 <span class="font-heading font-bold text-xl tracking-wide">Science with Mr Guevara</span>
+             </a>
+             <div class="hidden md:flex gap-8 font-semibold text-sm uppercase tracking-wider">
+                 <a href="#matter" class="hover:text-cga-gold transition-colors">Matter</a>
+                 <a href="#changes" class="hover:text-cga-gold transition-colors">Changes</a>
+                 <a href="#separation" class="hover:text-cga-gold transition-colors">Separation</a>
+                 <a href="#quiz" class="px-4 py-2 bg-cga-crimson rounded-lg hover:bg-red-700 transition-colors">Quiz Time!</a>
+             </div>
+             <!-- Mobile Menu Button -->
+             <button class="md:hidden text-2xl"><i class="fa-solid fa-bars"></i></button>
+         </div>
+     </nav>
+ 
+     <!-- Hero Section -->
+-    <header class="relative bg-gradient-to-br from-cga-navy to-blue-900 text-white py-32 overflow-hidden">
++    <header class="relative bg-gradient-to-br from-cga-crimson to-red-900 text-white py-32 overflow-hidden">
+         <div class="particle w-20 h-20 top-10 left-10 delay-0"></div>
+         <div class="particle w-32 h-32 bottom-20 right-20 delay-1000"></div>
+         <div class="particle w-12 h-12 top-40 right-1/3 delay-500"></div>
+ 
+         <div class="container mx-auto px-6 relative z-10 text-center" data-aos="zoom-in">
+             <div class="inline-block px-4 py-1 border border-cga-gold text-cga-gold rounded-full text-sm font-bold mb-4 uppercase tracking-widest">Chemistry Revision</div>
+             <h1 class="font-heading text-5xl md:text-7xl font-extrabold mb-6 leading-tight">
+                 Unit 1: Matter, Mixtures<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-cga-crimson to-cga-gold">and Separation</span>
+             </h1>
+             <p class="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-10 font-light">
+                 Dive into the building blocks of the universe! Explore atoms, chemical reactions, and the secrets of separating mixtures.
+             </p>
+             <div class="flex flex-col md:flex-row gap-4 justify-center">
+                 <a href="#matter" class="px-8 py-4 bg-cga-crimson text-white font-bold rounded-full hover:bg-red-700 transition-all hover:scale-105 shadow-lg shadow-red-900/50">
+                     Start Learning <i class="fa-solid fa-arrow-right ml-2"></i>
+                 </a>
+                 <button onclick="toggleChat()" class="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold rounded-full hover:from-purple-700 hover:to-indigo-700 transition-all hover:scale-105 shadow-lg flex items-center justify-center gap-2">
+                     <i class="fa-solid fa-robot"></i> Ask Mr. Guevara Bot 🤖
+                 </button>
+             </div>
+         </div>
+     </header>
+ 
+     <!-- Part 1: Matter & Atoms -->
+     <section id="matter" class="py-24 bg-white relative">
+ 
+EOF
+)
